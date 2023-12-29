@@ -4,11 +4,14 @@ const Home: React.FC = () => {
 	return (
 		<main>
 			<header>
-				<h1>mini games</h1>
+				<h1 style={{marginBottom: '50px'}}>pick a game</h1>
 			</header>
 			<section>
-				<a className="game-btn" href="/tic-tac-toe">
+				<a className="btn" href="/tic-tac-toe">
 					Tic-Tac-Toe
+				</a>
+				<a className="btn" href="/snake">
+					Snake
 				</a>
 			</section>
 		</main>

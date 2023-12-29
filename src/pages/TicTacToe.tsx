@@ -1,4 +1,5 @@
 import { useState } from "react";
+import '../styles/tic-tac-toe.css'
 
 type Squares = Array<String>
 
@@ -98,6 +99,11 @@ export default function TicTacToe() {
 		setCurrentMove(nextMove);
 	}
 
+    function handleReset(){
+        setHistory([Array(9).fill(null)]);
+        setCurrentMove(0)
+    }
+
 	const moves = history.map((squares: Squares, move: number) => {
 		let description;
 		if (move > 0) {
@@ -107,22 +113,34 @@ export default function TicTacToe() {
 		}
 		return (
 			<li key={move}>
-				<button onClick={() => jumpTo(move)}>{description}</button>
+				<button className="btn" onClick={() => jumpTo(move)}>{description}</button>
 			</li>
 		);
 	});
 
 	return (
-		<div className="game">
-			<div className="game-board">
-				<Board
-					xIsNext={xIsNext}
-					squares={currentSquares}
-					onPlay={handlePlay}
-				/>
-			</div>
-			<div className="game-info">
-				<ol>{moves}</ol>
+		<div className="tic-tac-toe">
+			<div className="row">
+				<div className="game">
+					<h1>Tic-Tac-Toe</h1>
+					<div className="game-board">
+						<Board
+							xIsNext={xIsNext}
+							squares={currentSquares}
+							onPlay={handlePlay}
+						/>
+					</div>
+					<div>
+						<button className="reset" onClick={handleReset}>
+							reset
+						</button>
+					</div>
+				</div>
+
+				<div className="game-info">
+					<h3>Moves</h3>
+					<ol>{moves}</ol>
+				</div>
 			</div>
 		</div>
 	);
