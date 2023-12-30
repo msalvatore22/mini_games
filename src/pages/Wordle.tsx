@@ -67,93 +67,70 @@ interface WordProps {
 	rowIndex: number;
 }
 
-// const Word: React.FC<WordProps> = ({ rowIndex }) => {
-// 	const [chars, setChars] = useState<string[]>(["", "", "", "", ""]);
-// 	const [charIdx, setCharIdx] = useState(0);
-
-// 	const handleKeyPress = (event: KeyboardEvent) => {
-// 		console.log(event.key);
-// 		// if letter
-// 		const newWord = chars.map((c, i) => {
-// 			if (i == charIdx) {
-// 				return (c = event.key);
-// 			} else {
-// 				return c;
-// 			}
-// 		});
-// 		setCharIdx((prev) => (prev += 1));
-// 		setChars(newWord);
-// 	};
-
-// 	useEffect(() => {
-// 		// Set up event listeners for keyboard input
-// 		window.addEventListener("keydown", handleKeyPress);
-
-// 		// Clean up event listeners and interval on component unmount
-// 		return () => {
-// 			window.removeEventListener("keydown", handleKeyPress);
-// 		};
-// 	}, [handleKeyPress]);
-
-// 	return (
-// 		<div className="wordle-word">
-// 			{chars.map((val, i) => (
-// 				<Char key={i} char={val} />
-// 			))}
-// 		</div>
-// 	);
-// };
+const fullWord = (
+	letterIdx: number,
+	max_word_idx: number,
+	letter: string
+): Boolean => {
+	return letterIdx === max_word_idx && letter !== "";
+};
 
 const BoardGame: React.FC = () => {
 	const [board, setBoard] = useState(initalBoardState);
 	const [rowIdx, setRowIdx] = useState(0);
 	const [letterIdx, setLetterIdx] = useState(0);
-	const [curWord, setCurWord] = useState(board[rowIdx]);
 	const MAX_WORD_IDX = 4;
-	console.log(curWord);
-	console.log(letterIdx);
+	const MAX_ROW_IDX = 5;
+	// const wordle = ["R", "E", "A", "C", "T"];
+
 	const handleKeyPress = (event: KeyboardEvent) => {
 		let keyCode = event.code;
 		let key = event.key;
 		let newBoard = [...board];
 		let curIdx = letterIdx;
+		let wordIsFull = fullWord(
+			letterIdx,
+			MAX_WORD_IDX,
+			newBoard[rowIdx][letterIdx].letter
+		);
 
-		const handleBackSpace = () => {
-			if (letterIdx == 0) return;
-			if (
-				letterIdx === MAX_WORD_IDX &&
-				newBoard[rowIdx][letterIdx].letter !== ""
-			) {
-				setLetterIdx(MAX_WORD_IDX);
-				newBoard[rowIdx][curIdx] = {
-					letter: "",
+		switch (keyCode) {
+			case "Backspace":
+				if (letterIdx == 0) return;
+				if (wordIsFull) {
+					setLetterIdx(MAX_WORD_IDX);
+					newBoard[rowIdx][curIdx] = {
+						letter: "",
+						status: "white",
+					};
+				} else {
+					setLetterIdx(curIdx - 1);
+					newBoard[rowIdx][curIdx - 1] = {
+						letter: "",
+						status: "white",
+					};
+				}
+				setBoard(newBoard);
+				break;
+			case `Key${key.toUpperCase()}`:
+				if (wordIsFull) {
+					return;
+				}
+				newBoard[rowIdx][letterIdx] = {
+					letter: event.key.toUpperCase(),
 					status: "white",
 				};
-			} else {
-				setLetterIdx(curIdx - 1);
-				newBoard[rowIdx][curIdx - 1] = {
-					letter: "",
-					status: "white",
-				};
-			}
-			setBoard(newBoard);
-		};
-
-		if (key === "Backspace") {
-			handleBackSpace();
-		}
-
-		if (newBoard[rowIdx][MAX_WORD_IDX].letter != "") {
-			return;
-		}
-
-		if (keyCode === `Key${key.toUpperCase()}`) {
-			newBoard[rowIdx][letterIdx] = {
-				letter: event.key,
-				status: "white",
-			};
-			setBoard(newBoard);
-			setLetterIdx(Math.min((curIdx + 1), MAX_WORD_IDX));
+				setBoard(newBoard);
+				setLetterIdx(Math.min(curIdx + 1, MAX_WORD_IDX));
+				break;
+			case "Enter":
+				if (wordIsFull) {
+					setLetterIdx(0);
+					setRowIdx((prev) => Math.min((prev += 1), MAX_ROW_IDX));
+				}
+				break;
+			default:
+				break;
 		}
 	};
 
