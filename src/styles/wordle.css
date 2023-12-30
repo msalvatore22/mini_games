@@ -1,0 +1,27 @@
+.wordle-char {
+    border: 1px solid white;
+    border-radius: 3px;
+    height: 50px;
+    width: 50px;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 3px;
+}
+
+.wordle-word {
+    display: flex
+}
+
+.wordle-word-row {
+    display: flex
+}
+
+.wordle-game {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}

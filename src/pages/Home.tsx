@@ -4,7 +4,7 @@ const Home: React.FC = () => {
 	return (
 		<main>
 			<header>
-				<h1 style={{marginBottom: '50px'}}>pick a game</h1>
+				<h1 style={{ marginBottom: "50px" }}>pick a game</h1>
 			</header>
 			<section>
 				<a className="btn" href="/tic-tac-toe">
@@ -12,6 +12,9 @@ const Home: React.FC = () => {
 				</a>
 				<a className="btn" href="/snake">
 					Snake
+				</a>
+				<a className="btn" href="/wordle">
+					Wordle
 				</a>
 			</section>
 		</main>
