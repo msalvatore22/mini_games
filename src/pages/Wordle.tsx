@@ -1,6 +1,6 @@
 // src/components/WordInput.tsx
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect, MouseEventHandler, BaseSyntheticEvent } from "react";
+import LetterBox from "../components/LetterBox";
 import "../styles/wordle.css";
 
 type Char = {
@@ -8,7 +8,7 @@ type Char = {
 	status: string;
 };
 
-type BoardState = Array<Array<Char>>;
+type BoardState = Char[][];
 
 let initalBoardState: BoardState = [
 	[
@@ -92,63 +92,6 @@ let keyboardState: BoardState = [
 	],
 ];
 
-interface LetterBoxProps {
-	letter: string;
-	color: string;
-	type: string;
-}
-
-const StyledLetterBox = styled.div.attrs<{ $type?: string }>((props) => ({}))`
-	border: 1px solid
-		${({ color }) => {
-			if (color === "none") {
-				return "white";
-			}
-			return color;
-		}};
-	border-radius: ${(props) => {
-		if (props.$type == "board") {
-			return "1px";
-		} else {
-			return "6px";
-		}
-	}};
-	height: 60px;
-	width: ${(props) => {
-		if (props.$type == "keyboard") {
-			return "40px";
-		} else {
-			return "60px";
-		}
-	}};
-	padding: 5px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin: 3px;
-	font-size: ${(props) => {
-		if (props.$type == "board") {
-			return "xx-large";
-		} else {
-			return "";
-		}
-	}};
-	background-color: ${({ color }) => color};
-	cursor: ${(props) => {
-		if (props.$type == "keyboard") {
-			return "pointer";
-		}
-	}};
-`;
-
-const LetterBox: React.FC<LetterBoxProps> = ({ letter, color, type }) => {
-	return (
-		<StyledLetterBox color={color} $type={type}>
-			{letter}
-		</StyledLetterBox>
-	);
-};
-
 const fullWord = (
 	letterIdx: number,
 	max_word_idx: number,
@@ -156,10 +99,6 @@ const fullWord = (
 ): Boolean => {
 	return letterIdx === max_word_idx && letter !== "";
 };
-
-// const setColor = (board: BoardState, word: string): BoardState => {
-
-// }
 
 const Wordle: React.FC = () => {
 	const [board, setBoard] = useState(initalBoardState);
@@ -170,9 +109,35 @@ const Wordle: React.FC = () => {
 	const MAX_ROW_IDX = 5;
 	const wordle = ["R", "E", "A", "C", "T"];
 
-	const handleKeyPress = (event: KeyboardEvent) => {
-		let keyCode = event.code;
+    const handleClick = (event: BaseSyntheticEvent) => {
+		let letter = event.target.innerText
+        let action = "Add"
+        if(letter === "Del"){
+            action = "Delete"
+        } 
+        if(letter === "Enter"){
+            action = 'Submit'
+        }
+        handleBoardUpdates(action, letter)
+	};
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+        let keyCode = event.code;
 		let key = event.key;
+        let action = ''
+        if(keyCode === "Backspace"){
+            action = "Delete"
+        }
+        if(keyCode === "Enter"){
+            action = 'Submit'
+        }
+        if(keyCode === `Key${key.toUpperCase()}`){
+            action = "Add";
+        }
+        return handleBoardUpdates(action, key.toUpperCase())
+    }
+
+	const handleBoardUpdates = (action: string, letter: string) => {
 		let newBoard = [...board];
 		let curIdx = letterIdx;
 		let wordIsFull = fullWord(
@@ -183,8 +148,8 @@ const Wordle: React.FC = () => {
         
         let newKeyboard = [...keyboard]
 
-		switch (keyCode) {
-			case "Backspace":
+		switch (action) {
+			case "Delete":
 				if (letterIdx == 0) return;
 				if (wordIsFull) {
 					setLetterIdx(MAX_WORD_IDX);
@@ -201,18 +166,18 @@ const Wordle: React.FC = () => {
 				}
 				setBoard(newBoard);
 				break;
-			case `Key${key.toUpperCase()}`:
+			case "Add":
 				if (wordIsFull) {
 					return;
 				}
 				newBoard[rowIdx][letterIdx] = {
-					letter: event.key.toUpperCase(),
+					letter: letter,
 					status: "none",
 				};
 				setBoard(newBoard);
 				setLetterIdx(Math.min(curIdx + 1, MAX_WORD_IDX));
 				break;
-			case "Enter":
+			case "Submit":
 				if (wordIsFull) {
 					// color change
 					newBoard[rowIdx].forEach((c, i) => {
@@ -274,6 +239,7 @@ const Wordle: React.FC = () => {
 						{b.map((row, idx) => {
 							return (
 								<LetterBox
+									handleClick={(e) => handleClick(e)}
 									letter={row.letter}
 									color={row.status}
 									type="board"
@@ -290,6 +256,7 @@ const Wordle: React.FC = () => {
 						{k.map((row, idx) => {
 							return (
 								<LetterBox
+                                    handleClick={(e) => handleClick(e)}
 									letter={row.letter}
 									color={row.status}
 									type="keyboard"
