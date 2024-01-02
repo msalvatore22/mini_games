@@ -88,16 +88,17 @@ let keyboardState: BoardState = [
 		{ letter: "B", status: "none" },
 		{ letter: "N", status: "none" },
 		{ letter: "M", status: "none" },
-		{ letter: "Backspace", status: "none" },
+		{ letter: "Del", status: "none" },
 	],
 ];
 
 interface LetterBoxProps {
 	letter: string;
 	color: string;
+	type: string;
 }
 
-const StyledLetterBox = styled.div`
+const StyledLetterBox = styled.div.attrs<{ $type?: string }>((props) => ({}))`
 	border: 1px solid
 		${({ color }) => {
 			if (color === "none") {
@@ -105,19 +106,47 @@ const StyledLetterBox = styled.div`
 			}
 			return color;
 		}};
-	border-radius: 3px;
-	height: 50px;
-	width: 50px;
+	border-radius: ${(props) => {
+		if (props.$type == "board") {
+			return "1px";
+		} else {
+			return "6px";
+		}
+	}};
+	height: 60px;
+	width: ${(props) => {
+		if (props.$type == "keyboard") {
+			return "40px";
+		} else {
+			return "60px";
+		}
+	}};
 	padding: 5px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin: 3px;
+	font-size: ${(props) => {
+		if (props.$type == "board") {
+			return "xx-large";
+		} else {
+			return "";
+		}
+	}};
 	background-color: ${({ color }) => color};
+	cursor: ${(props) => {
+		if (props.$type == "keyboard") {
+			return "pointer";
+		}
+	}};
 `;
 
-const LetterBox: React.FC<LetterBoxProps> = ({ letter, color }) => {
-	return <StyledLetterBox color={color}>{letter}</StyledLetterBox>;
+const LetterBox: React.FC<LetterBoxProps> = ({ letter, color, type }) => {
+	return (
+		<StyledLetterBox color={color} $type={type}>
+			{letter}
+		</StyledLetterBox>
+	);
 };
 
 const fullWord = (
@@ -127,6 +156,10 @@ const fullWord = (
 ): Boolean => {
 	return letterIdx === max_word_idx && letter !== "";
 };
+
+// const setColor = (board: BoardState, word: string): BoardState => {
+
+// }
 
 const Wordle: React.FC = () => {
 	const [board, setBoard] = useState(initalBoardState);
@@ -147,6 +180,8 @@ const Wordle: React.FC = () => {
 			MAX_WORD_IDX,
 			newBoard[rowIdx][letterIdx].letter
 		);
+        
+        let newKeyboard = [...keyboard]
 
 		switch (keyCode) {
 			case "Backspace":
@@ -193,10 +228,25 @@ const Wordle: React.FC = () => {
 									status: "#b59f3b",
 								};
 							}
-						}
+						} else {
+                            newBoard[rowIdx][i] = {
+								letter: c.letter,
+								status: "#3a3a3d",
+							};
+                        }
 					});
-					console.log(newBoard);
+                    newBoard[rowIdx].forEach((c, i) => {
+                        newKeyboard.forEach((row, i) => {
+                            row.forEach((l, k) => {
+                                if(c.letter === l.letter){
+                                    newKeyboard[i][k] = c
+                                }
+                            })
+                        })
+                    })
+					
 					setBoard(newBoard);
+                    setKeyboard(newKeyboard)
 					setLetterIdx(0);
 					setRowIdx((prev) => Math.min((prev += 1), MAX_ROW_IDX));
 				}
@@ -226,6 +276,7 @@ const Wordle: React.FC = () => {
 								<LetterBox
 									letter={row.letter}
 									color={row.status}
+									type="board"
 									key={idx}
 								/>
 							);
@@ -241,6 +292,7 @@ const Wordle: React.FC = () => {
 								<LetterBox
 									letter={row.letter}
 									color={row.status}
+									type="keyboard"
 									key={idx}
 								/>
 							);
